@@ -1,0 +1,102 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.schedule_test.MainActivity" >
+
+    <!-- weekdays on top -->
+    <LinearLayout android:id="@+id/layout_weekdays"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true" >
+        
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/sun" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mon" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tue" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/wed" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/thr" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/fri" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/sat" />
+    </LinearLayout>
+    
+    <ScrollView android:id="@+id/scroll_view"
+    	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:layout_below="@+id/layout_weekdays" >
+        
+        <RelativeLayout android:id="@+id/calendar_layout"
+            android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+        	android:paddingTop="5dp" >
+            
+            <LinearLayout 
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:orientation="horizontal"
+		        android:layout_alignParentTop="true" >
+        	
+			    <com.example.schedule_test.ExpandableHeightGridView 
+			        android:id="@+id/gridview_time"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"	
+					android:layout_weight="1"	    
+					android:numColumns="1"
+					android:gravity="center">							
+				</com.example.schedule_test.ExpandableHeightGridView >
+				
+			    <com.example.schedule_test.ExpandableHeightGridView 
+			        android:id="@+id/gridview_days"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"	
+					android:layout_weight="7"	    
+					android:numColumns="7"
+					android:gravity="center"
+					android:listSelector="@android:color/transparent">							
+				</com.example.schedule_test.ExpandableHeightGridView >				
+			    
+			</LinearLayout>
+        	
+            <TextView android:id="@+id/indicator_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            
+            <TextView android:id="@+id/indicator_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            
+		</RelativeLayout>
+	</ScrollView>
+</RelativeLayout>
