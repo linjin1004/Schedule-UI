@@ -222,7 +222,7 @@ public class MainActivity extends ActionBarActivity {
 	    		try {
 	    			ArrayList<Object> gridPositions = timeToGridPositions(scheduleData.getJSONObject(i));
 	    			for(int m=0; m < gridPositions.size(); m++){
-	    				if(touchedView.getTag() == gridPositions.get(m)){
+	    				if((int)touchedView.getTag() == (int)gridPositions.get(m)){
 	    					selectedArray = gridPositions;
 	    					editingScheduleIndex = i; 
 	    					break;
@@ -244,7 +244,7 @@ public class MainActivity extends ActionBarActivity {
 	}
 	public void moveSelection(View touchedView, ExpandableHeightGridView gridViewDays){
 		scrollView.requestDisallowInterceptTouchEvent(true);
-		if(selectionStart){
+		if(selectionStart && checkIfSameColumn((int)touchedView.getTag())){
 			Object currentTag = touchedView.getTag();
 			Object lastTag = lastTouchedView.getTag();
 			if(lastTouchedView != touchedView){
@@ -259,7 +259,6 @@ public class MainActivity extends ActionBarActivity {
 				}				
 				lastTouchedView = touchedView;
 			}
-			//adjust indicators position
 		}
 	}
 	public void inactiveSelection(){
@@ -271,12 +270,25 @@ public class MainActivity extends ActionBarActivity {
 				JSONObject startTimeObject = gridPositionToTime(maxAndMinPosition.get("min"));
 				JSONObject endTimeObject = gridPositionToTime(maxAndMinPosition.get("max"));
 				JSONObject thisSchedule = scheduleData.getJSONObject(editingScheduleIndex);
-				thisSchedule.put("weekday", startTimeObject.getInt("startTimeObject"));
+				thisSchedule.put("weekday", startTimeObject.getInt("weekday"));
 				thisSchedule.put("start", startTimeObject.getString("start"));
-				thisSchedule.put("end", endTimeObject.getString("start"));
+				thisSchedule.put("end", endTimeObject.getString("end"));
 			} catch (Exception e) {
 				
 			}			
+		}else{
+			HashMap<String, Integer> maxAndMinPosition = getMaxAndMinPosition();
+			try {
+				JSONObject startTimeObject = gridPositionToTime(maxAndMinPosition.get("min"));
+				JSONObject endTimeObject = gridPositionToTime(maxAndMinPosition.get("max"));
+				JSONObject thisSchedule = new JSONObject();
+				thisSchedule.put("weekday", startTimeObject.getInt("weekday"));
+				thisSchedule.put("start", startTimeObject.getString("start"));
+				thisSchedule.put("end", endTimeObject.getString("end"));
+				scheduleData.put(thisSchedule);
+			} catch (Exception e) {
+				
+			}	
 		}
 		editingScheduleIndex = -1;
 		selectionStart = false;
@@ -291,18 +303,26 @@ public class MainActivity extends ActionBarActivity {
 			return false;
 		}
 	}
-	public void showIndicators(ExpandableHeightGridView gridViewDays){
-		mStartIndicator.setText("start");
-		mStartIndicator.setVisibility(View.VISIBLE);
-		mEndIndicator.setText("end");
-		mEndIndicator.setVisibility(View.VISIBLE);
-		
+	public void showIndicators(ExpandableHeightGridView gridViewDays){		
 		HashMap<String, Integer> maxAndMinPosition = getMaxAndMinPosition();
 		int minPosition = maxAndMinPosition.get("min");
 		int maxPosition = maxAndMinPosition.get("max");
 		View startView = gridViewDays.getChildAt(minPosition);
 		View endView = gridViewDays.getChildAt(maxPosition);
+		JSONObject startTimeObject = gridPositionToTime(minPosition);
+		JSONObject endTimeObject = gridPositionToTime(maxPosition);
+		String startString = "";
+		String endString = "";
+		try {
+			startString = startTimeObject.getString("start");
+			endString = endTimeObject.getString("end");
+		} catch (Exception e) {
+			
+		}
+		mStartIndicator.setText(startString);
+		mEndIndicator.setText(endString);
 		
+		// check the position of indicators
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params.leftMargin = (int)startView.getX();
 		params.topMargin = (int)startView.getY() - mGridHigh/3 ;
@@ -313,6 +333,9 @@ public class MainActivity extends ActionBarActivity {
 		params.topMargin = (int)endView.getY() + mGridHigh/3*2 ;
 		((ViewGroup)mEndIndicator.getParent()).removeView(mEndIndicator);
 		calendarLayout.addView(mEndIndicator, params);
+		
+		mStartIndicator.setVisibility(View.VISIBLE);
+		mEndIndicator.setVisibility(View.VISIBLE);
 	}
 	public void hideIndicators(){
 		mStartIndicator.setVisibility(View.INVISIBLE);

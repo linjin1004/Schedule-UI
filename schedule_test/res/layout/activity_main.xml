@@ -61,8 +61,18 @@
             android:layout_width="match_parent"
         	android:layout_height="match_parent"
         	android:paddingTop="5dp" >
+        	
+            <TextView android:id="@+id/indicator_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
             
-            <LinearLayout 
+            <TextView android:id="@+id/indicator_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"  />
+            
+            <LinearLayout android:id="@+id/layout_all_grids"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:orientation="horizontal"
@@ -88,14 +98,6 @@
 				</com.example.schedule_test.ExpandableHeightGridView >				
 			    
 			</LinearLayout>
-        	
-            <TextView android:id="@+id/indicator_start"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            
-            <TextView android:id="@+id/indicator_end"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
             
 		</RelativeLayout>
 	</ScrollView>
