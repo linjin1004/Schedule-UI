@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="schedule_blue_green" type="color">#4DA8BF</item>
+    <item name="schedule_advanced_title" type="color">#4E5260</item>
+    <item name="schdeul_indicator" type="color">#747474</item>
+    <item name="schedule_blue" type="color">#41BFE2</item>
+    <item name="schedule_grey" type="color">#D6D6D6</item>
+    <item name="schedule_name" type="color">#535353</item>
+</resources>

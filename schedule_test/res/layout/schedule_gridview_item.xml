@@ -6,7 +6,8 @@
     <TextView android:id="@+id/grid_item_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true"
+        android:textColor="@color/schedule_blue_green" >
     </TextView>    
 
 </RelativeLayout>
