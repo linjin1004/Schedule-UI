@@ -2,45 +2,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.schedule_test.MainActivity" >
+    tools:context="com.example.schedule_test.MainActivity"
+	android:descendantFocusability="beforeDescendants"
+	android:focusableInTouchMode="true" >
     
    	<LinearLayout android:id="@+id/layout_schedule_name"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:orientation="vertical"
-        android:layout_alignParentTop="true"
-        android:padding="16dp"
-        android:background="@color/schedule_blue_green" >
+        android:layout_alignParentTop="true" >
         
-        <TextView android:id="@+id/schedule_name"
+        <EditText android:id="@+id/schedule_name"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:text="Schedue #2"
+            android:layout_height="match_parent"
+            android:text=""
             android:textSize="18sp"
             android:textColor="@color/schedule_name"
-            android:padding="5dp" />
+       		android:background="@drawable/schedule_name_input"
+       		android:paddingLeft="30dp"
+       		android:paddingRight="25dp" />
         
    	</LinearLayout>
 
+    <TextView android:id="@+id/week_title_space"
+    	android:layout_width="75dp"
+        android:layout_height="36dp"
+        android:layout_below="@+id/layout_schedule_name"
+        android:layout_alignParentLeft="true"
+        android:background="@color/schedule_blue_green" />
     <!-- weekdays on top -->
     <LinearLayout android:id="@+id/layout_weekdays"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@+id/layout_schedule_name" >
+        android:layout_below="@+id/layout_schedule_name"
+        android:layout_toEndOf="@+id/week_title_space" >
         
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/schedule_blue_green" />
         <TextView
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
             android:gravity="bottom"
             android:text="@string/sun"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
@@ -49,6 +53,7 @@
             android:layout_weight="1"
             android:gravity="bottom"
             android:text="@string/mon"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
@@ -57,6 +62,7 @@
             android:layout_weight="1"
             android:gravity="bottom"
             android:text="@string/tue"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
@@ -65,6 +71,7 @@
             android:layout_weight="1"
             android:gravity="bottom"
             android:text="@string/wed"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
@@ -73,6 +80,7 @@
             android:layout_weight="1"
             android:gravity="bottom"
             android:text="@string/thr"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
@@ -81,6 +89,7 @@
             android:layout_weight="1"
             android:gravity="bottom"
             android:text="@string/fri"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
@@ -89,6 +98,7 @@
             android:layout_weight="1"
             android:gravity="bottom"
             android:text="@string/sat"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
     </LinearLayout>
@@ -96,28 +106,33 @@
     <ScrollView android:id="@+id/scroll_view"
     	android:layout_width="match_parent"
     	android:layout_height="match_parent"
-    	android:layout_below="@+id/layout_weekdays"    	 >
+    	android:layout_below="@+id/week_title_space"
+    	android:layout_alignParentLeft="true" 
+    	android:background="@android:color/white"   	 >
         
         <RelativeLayout
             android:layout_width="match_parent"
         	android:layout_height="match_parent" >
+        	
+            <com.example.schedule_test.ExpandableHeightGridView 
+			    android:id="@+id/gridview_time"
+				android:layout_width="43dp"
+				android:layout_height="match_parent"						
+		        android:layout_alignParentTop="true"	    
+		        android:layout_alignParentLeft="true"
+		        android:layout_marginLeft="16dp"
+		        android:layout_marginTop="9dp"
+				android:numColumns="1"
+				android:gravity="center">							
+			</com.example.schedule_test.ExpandableHeightGridView >
             
             <LinearLayout android:id="@+id/calendar_layout"
-		        android:layout_width="match_parent"
+		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:orientation="horizontal"
-		        android:layout_alignParentTop="true"
+		        android:layout_toEndOf="@+id/gridview_time"
 		        android:layout_marginTop="24dp"
 		        android:layout_marginBottom="24dp" >
-        	
-			    <com.example.schedule_test.ExpandableHeightGridView 
-			        android:id="@+id/gridview_time"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"	
-					android:layout_weight="1"	    
-					android:numColumns="1"
-					android:gravity="center">							
-				</com.example.schedule_test.ExpandableHeightGridView >
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
 			        android:id="@+id/gridview_sun"
@@ -126,7 +141,11 @@
 					android:layout_weight="1"	    
 					android:numColumns="1"
 					android:gravity="center"
-					android:listSelector="@android:color/transparent" >							
+					android:listSelector="@android:color/transparent"
+					android:paddingTop="2dp"
+					android:paddingBottom="2dp"					
+					android:paddingLeft="1dp"
+            		android:background="@color/schedule_blue_green" >							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
@@ -136,7 +155,11 @@
 					android:layout_weight="1"	    
 					android:numColumns="1"
 					android:gravity="center"
-					android:listSelector="@android:color/transparent">							
+					android:listSelector="@android:color/transparent"
+					android:paddingTop="2dp"
+					android:paddingBottom="2dp"					
+					android:paddingLeft="1dp"
+            		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >		
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
@@ -146,7 +169,11 @@
 					android:layout_weight="1"	    
 					android:numColumns="1"
 					android:gravity="center"
-					android:listSelector="@android:color/transparent">							
+					android:listSelector="@android:color/transparent"
+					android:paddingTop="2dp"
+					android:paddingBottom="2dp"					
+					android:paddingLeft="1dp"
+            		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
@@ -156,7 +183,11 @@
 					android:layout_weight="1"	    
 					android:numColumns="1"
 					android:gravity="center"
-					android:listSelector="@android:color/transparent">							
+					android:listSelector="@android:color/transparent"
+					android:paddingTop="2dp"
+					android:paddingBottom="2dp"					
+					android:paddingLeft="1dp"
+            		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
@@ -166,7 +197,11 @@
 					android:layout_weight="1"	    
 					android:numColumns="1"
 					android:gravity="center"
-					android:listSelector="@android:color/transparent">							
+					android:listSelector="@android:color/transparent"
+					android:paddingTop="2dp"
+					android:paddingBottom="2dp"					
+					android:paddingLeft="1dp"
+            		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
@@ -176,7 +211,11 @@
 					android:layout_weight="1"	    
 					android:numColumns="1"
 					android:gravity="center"
-					android:listSelector="@android:color/transparent">							
+					android:listSelector="@android:color/transparent"
+					android:paddingTop="2dp"
+					android:paddingBottom="2dp"					
+					android:paddingLeft="1dp"
+            		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
@@ -186,15 +225,36 @@
 					android:layout_weight="1"	    
 					android:numColumns="1"
 					android:gravity="center"
-					android:listSelector="@android:color/transparent">							
+					android:listSelector="@android:color/transparent"
+					android:paddingTop="2dp"
+					android:paddingBottom="2dp"					
+					android:paddingLeft="1dp"
+            		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >		
 			    
 			</LinearLayout>
+			
+            <RelativeLayout android:id="@+id/layout_draw_selection"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:orientation="horizontal"
+	            android:background="@color/schdeul_indicator"
+				android:paddingTop="2dp"
+				android:paddingBottom="2dp"					
+				android:paddingLeft="2dp"					
+				android:paddingRight="2dp"
+				android:visibility="gone">
+	            <View 
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+	            	android:background="@color/schedule_grey">							
+				</View >
+			</RelativeLayout>
         	
             <TextView android:id="@+id/indicator_start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ime_bg"
+                android:background="@drawable/schedule_ime_bg"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="00:00"
@@ -204,7 +264,7 @@
             <TextView android:id="@+id/indicator_end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ime_bg"
+                android:background="@drawable/schedule_ime_bg"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="00:00"
@@ -214,19 +274,13 @@
             <ImageView android:id="@+id/indicator_up"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/up"
+                android:background="@drawable/schedule_up"
                 android:visibility="gone" />
             
             <ImageView android:id="@+id/indicator_down"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/down"
-                android:visibility="gone" />
-            
-            <ImageView android:id="@+id/indicator_delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/delete"
+                android:background="@drawable/schedule_down"
                 android:visibility="gone" />
             
             <View 
@@ -235,7 +289,13 @@
 				android:layout_height="wrap_content"	 
 				android:background="@android:color/transparent"
 				android:visibility="gone">							
-			</View >
+			</View>
+            
+            <ImageView android:id="@+id/indicator_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/schedule_delete"
+                android:visibility="gone" />
             
 		</RelativeLayout>
 	</ScrollView>

@@ -10,19 +10,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -32,18 +28,25 @@ import android.widget.TextView;
 public class MainActivity extends ActionBarActivity {
 	private ArrayList<String> mTimeArray = new ArrayList<String>();
 	//private ArrayList<String> mScheduleDayGridArray = new ArrayList<String>();
-	private int GRID_HEIGHT = 60; 
+	private int GRID_HEIGHT = 30; 
+	private int GRID_LEFT = 59; 
+	private int GRID_TOP = 24;
 	private ScrollView scrollView;
 	private int WEEKDAY_GRID_COUNT = 48;
 	private int INDICATOR_PADDING = 8;
+	int indicatorPadding;
+	int scheduleLeftMargin;
+	int scheduleTopMargin;
 	SimpleDateFormat df = new SimpleDateFormat("HH:mm");
 	View viewInteraction;
-	View selectedGridView;
+	View mSelectedGridView;
+	RelativeLayout mDrawSelectionLayout;
 
 	private TextView mStartIndicator;
 	private TextView mEndIndicator;
 	private ImageView mUpIndicator;
 	private ImageView mDownIndicator;
+	private ImageView mDeleteButton;
 	/**
 	 * parameters for interaction events
 	 */
@@ -58,15 +61,21 @@ public class MainActivity extends ActionBarActivity {
 	private TouchState mGridInteractionTouchState = TouchState.TOUCH_STATE_RESTING;
 	private TouchState mWeekdayTouchState = TouchState.TOUCH_STATE_RESTING;
 	private ArrayList<View> mWeekdayGridViews = new ArrayList<View>();
-	private View lastTouchedView;
-	private boolean selectionStart = false;
-	private int editingScheduleIndex = -1;
-	
+	private float lastTouchedY;
+	private int lastTouchedPosition;
+	private enum SelectionStartPoint{
+		UP_ARROW,
+		DOWN_ARROW
+	}
+	private SelectionStartPoint mSelectionStartFrom = null;
 	/**
-	 * hardcore test data
-	 */
+	 * For schedule data
+	 */	
 	JSONArray scheduleData = new JSONArray();
-	JSONObject temp = new JSONObject();
+	private String START_TIME = "start";
+	private String END_TIME = "end";
+	private String DAY = "day";
+	private String SCHEDULE_ARRAY = "schedule_array";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,35 +85,58 @@ public class MainActivity extends ActionBarActivity {
 		/**
 		 * hardcore test data
 		 */
+		JSONObject temp = new JSONObject();
+		JSONArray tempArray = new JSONArray();
+		JSONObject tempDayObject = new JSONObject();
 		try {
 			temp = new JSONObject();
-			temp.put("weekday", "1");
-			temp.put("start", "03:30");
-			temp.put("end", "06:00");
-			scheduleData.put(temp);
+			temp.put(START_TIME, "03:30");
+			temp.put(END_TIME, "06:00");
+			tempArray.put(temp);
+			tempDayObject.put(DAY, "1");
+			tempDayObject.put(SCHEDULE_ARRAY, tempArray);
+			scheduleData.put(tempDayObject);
 			temp = new JSONObject();
-			temp.put("weekday", "2");
-			temp.put("start", "03:00");
-			temp.put("end", "06:30");
-			scheduleData.put(temp);
+			tempArray = new JSONArray();
+			tempDayObject = new JSONObject();
+			temp.put(START_TIME, "03:00");
+			temp.put(END_TIME, "06:30");
+			tempArray.put(temp);
+			tempDayObject.put(DAY, "2");
+			tempDayObject.put(SCHEDULE_ARRAY, tempArray);
+			scheduleData.put(tempDayObject);
 			temp = new JSONObject();
-			temp.put("weekday", "3");
+			tempArray = new JSONArray();
+			tempDayObject = new JSONObject();
 			temp.put("start", "00:30");
 			temp.put("end", "06:30");
-			scheduleData.put(temp);
+			tempArray.put(temp);
+			tempDayObject.put(DAY, "3");
+			tempDayObject.put(SCHEDULE_ARRAY, tempArray);
+			scheduleData.put(tempDayObject);
 			temp = new JSONObject();
-			temp.put("weekday", "4");
+			tempArray = new JSONArray();
+			tempDayObject = new JSONObject();
 			temp.put("start", "03:00");
 			temp.put("end", "06:30");
-			scheduleData.put(temp);
+			tempArray.put(temp);
+			tempDayObject.put(DAY, "4");
+			tempDayObject.put(SCHEDULE_ARRAY, tempArray);
+			scheduleData.put(tempDayObject);
 			temp = new JSONObject();
-			temp.put("weekday", "5");
+			tempArray = new JSONArray();
+			tempDayObject = new JSONObject();;
 			temp.put("start", "03:30");
 			temp.put("end", "06:00");
-			scheduleData.put(temp);
+			tempArray.put(temp);
+			tempDayObject.put(DAY, "5");
+			tempDayObject.put(SCHEDULE_ARRAY, tempArray);
+			scheduleData.put(tempDayObject);
 		} catch (JSONException e1) {
 			
 		}
+		//System.out.println(scheduleData);
+		
 		//set mScheduleGrid
 		Date d1;
 		Calendar cal = Calendar.getInstance();
@@ -118,238 +150,118 @@ public class MainActivity extends ActionBarActivity {
 			mTimeArray.add(df.format(cal.getTime()));
 			cal.add(Calendar.MINUTE, 30);
 		}
-		//set mScheduleGridArray
-		//for(int i=0; i < mScheduleGridCount; i++){
-		//	mScheduleGridArray.add(Integer.toString(i));
-		//}
 		
 		scrollView = (ScrollView) findViewById(R.id.scroll_view);
+		final int scheduleGridHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, GRID_HEIGHT, getResources().getDisplayMetrics());
+		scheduleLeftMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, GRID_LEFT, getResources().getDisplayMetrics());
+		indicatorPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, INDICATOR_PADDING, getResources().getDisplayMetrics());
+		scheduleTopMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, GRID_TOP, getResources().getDisplayMetrics());
 		
-		ExpandableHeightGridView gridView = (ExpandableHeightGridView) findViewById(R.id.gridview_time);
-		gridView.setEnabled(false);
-		gridView.setAdapter(new TimeAdapter(this, mTimeArray));
-		gridView.setExpanded(true);
-		
+		final ExpandableHeightGridView gridViewTime = (ExpandableHeightGridView) findViewById(R.id.gridview_time);
+		gridViewTime.setEnabled(false);
+		gridViewTime.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, false));
+		gridViewTime.setExpanded(true);
+
 		ScheduleTimeTouchEvent scheduleTimeTouchEvent = new ScheduleTimeTouchEvent();
 		WeekDayGridTouchEvent weekdayGridClickEvent = new WeekDayGridTouchEvent();
 		// Sun to Sat grid views
 		final ExpandableHeightGridView gridViewSun = (ExpandableHeightGridView) findViewById(R.id.gridview_sun);
-		gridViewSun.setAdapter(new TimeAdapter(this, mTimeArray));
+		gridViewSun.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, true));
 		gridViewSun.setExpanded(true);
 		gridViewSun.setOnTouchListener(weekdayGridClickEvent);
 		gridViewSun.setTag("gridview_sun");
 		mWeekdayGridViews.add(gridViewSun);
 
 		final ExpandableHeightGridView gridViewMon = (ExpandableHeightGridView) findViewById(R.id.gridview_mon);
-		gridViewMon.setAdapter(new TimeAdapter(this, mTimeArray));
+		gridViewMon.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, true));
 		gridViewMon.setExpanded(true);
 		gridViewMon.setOnTouchListener(weekdayGridClickEvent);
 		gridViewMon.setTag("gridview_mon");
 		mWeekdayGridViews.add(gridViewMon);
 
 		final ExpandableHeightGridView gridViewTue = (ExpandableHeightGridView) findViewById(R.id.gridview_tue);
-		gridViewTue.setAdapter(new TimeAdapter(this, mTimeArray));
+		gridViewTue.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, true));
 		gridViewTue.setExpanded(true);
 		gridViewTue.setOnTouchListener(weekdayGridClickEvent);
 		gridViewTue.setTag("gridview_tue");
 		mWeekdayGridViews.add(gridViewTue);
 
 		final ExpandableHeightGridView gridViewWed = (ExpandableHeightGridView) findViewById(R.id.gridview_wed);
-		gridViewWed.setAdapter(new TimeAdapter(this, mTimeArray));
+		gridViewWed.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, true));
 		gridViewWed.setExpanded(true);
 		gridViewWed.setOnTouchListener(weekdayGridClickEvent);
 		gridViewWed.setTag("gridview_wed");
 		mWeekdayGridViews.add(gridViewWed);
 
 		final ExpandableHeightGridView gridViewThr = (ExpandableHeightGridView) findViewById(R.id.gridview_thr);
-		gridViewThr.setAdapter(new TimeAdapter(this, mTimeArray));
+		gridViewThr.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, true));
 		gridViewThr.setExpanded(true);
 		gridViewThr.setOnTouchListener(weekdayGridClickEvent);
 		gridViewThr.setTag("gridview_thr");
 		mWeekdayGridViews.add(gridViewThr);
 
 		final ExpandableHeightGridView gridViewFri = (ExpandableHeightGridView) findViewById(R.id.gridview_fri);
-		gridViewFri.setAdapter(new TimeAdapter(this, mTimeArray));
+		gridViewFri.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, true));
 		gridViewFri.setExpanded(true);
 		gridViewFri.setOnTouchListener(weekdayGridClickEvent);
 		gridViewFri.setTag("gridview_fri");
 		mWeekdayGridViews.add(gridViewFri);
 
 		final ExpandableHeightGridView gridViewSat = (ExpandableHeightGridView) findViewById(R.id.gridview_sat);
-		gridViewSat.setAdapter(new TimeAdapter(this, mTimeArray));
+		gridViewSat.setAdapter(new TimeAdapter(this, mTimeArray, scheduleGridHeight, true));
 		gridViewSat.setExpanded(true);
 		gridViewSat.setOnTouchListener(weekdayGridClickEvent);
 		gridViewSat.setTag("gridview_sat");
 		mWeekdayGridViews.add(gridViewSat);
 		
+		mDrawSelectionLayout = (RelativeLayout) findViewById(R.id.layout_draw_selection);
+		mDrawSelectionLayout.setTag("draw_selection_view");
 		viewInteraction = (View) findViewById(R.id.view_interaction);
-		//viewInteraction.setAdapter(new TimeAdapter(this, mTimeArray));
-		//viewInteraction.setExpanded(true);
 		viewInteraction.setOnTouchListener(scheduleTimeTouchEvent);
 		viewInteraction.setTag("view_interaction");
-		
-		/*
-		gridViewDays.getViewTreeObserver().addOnGlobalLayoutListener(
-			new ViewTreeObserver.OnGlobalLayoutListener() {
-			    @Override
-			    public void onGlobalLayout() {
-			    	// draw existed schedule on UI
-			    	for(int i=0; i < scheduleData.length(); i++){
-			    		try {
-			    			ArrayList<Object> gridPositions = timeToGridPositions(scheduleData.getJSONObject(i));
-			    			for(int m=0; m < gridPositions.size(); m++){
-			    				View grid = gridViewDays.getChildAt((int) gridPositions.get(m));
-			    				grid.setBackgroundColor(Color.GRAY);
-			    			}
-			    		} catch (Exception e) {
-			    				
-			    		}	
-			    	}
-			        // unregister listener (this is important)
-			    	gridViewDays.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-			    }
-			}
-		);*/
 		
 		mStartIndicator = (TextView) findViewById(R.id.indicator_start);
 		mEndIndicator = (TextView) findViewById(R.id.indicator_end);
 		mUpIndicator = (ImageView) findViewById(R.id.indicator_up);
 		mDownIndicator = (ImageView) findViewById(R.id.indicator_down);
-	}
-	public void initialMovement(View touchedView){
-		lastTouchedView = touchedView;
-		int thisPosition = (int) touchedView.getTag();
-		if(thisPosition == mSelectStartPosition || thisPosition == mSelectEndPosition ){
-			selectionStart = true;
-		}else{
-			selectionStart = false;
-		}
-	}
-	
-	public void activeSelection(View touchedView, ExpandableHeightGridView gridView){
-		mSelectActivedDay = (String) gridView.getTag();
-		if(touchedView.getTag() != null){
-			touchedView.setBackgroundColor(Color.GRAY);
-			int selectionStartPosition = (int)touchedView.getTag();
-	    	System.out.println(selectionStartPosition + " activeSelection");
-	    	disableScroll(scrollView);	    
-	    	
-	    	int selectionEndPosition = selectionStartPosition;
-	    	
-	    	// keep track of the selection of this time
-	    	/*selectedArray.clear();
-	    	for(int i=0; i < scheduleData.length(); i++){
-	    		try {
-	    			ArrayList<Object> gridPositions = timeToGridPositions(scheduleData.getJSONObject(i));
-	    			for(int m=0; m < gridPositions.size(); m++){
-	    				if((int)touchedView.getTag() == (int)gridPositions.get(m)){
-	    					selectedArray = gridPositions;
-	    					editingScheduleIndex = i; 
-	    					break;
-	    				}
-	    			}
-	    			if(editingScheduleIndex >= 0){
-	    				break;
-	    			}
-	    		} catch (Exception e) {
-	    				
-	    		}	
-	    	}
-	    	if(editingScheduleIndex < 0){
-	    		selectedArray.add(touchedView.getTag());
-	    	}	    	*/
-	    	selectionStart = false;
-	    	mSelectStartPosition = selectionStartPosition;
-	    	mSelectEndPosition = selectionEndPosition;
-	    	showIndicators(gridView);
-		}
-	}
-	
-	public void moveSelection(View touchedView, ExpandableHeightGridView gridView){
-		scrollView.requestDisallowInterceptTouchEvent(true);
-		if(selectionStart && touchedView.getTag() != null){
-			int currentPosition = (int) touchedView.getTag();
-			int lastPosition = (int) lastTouchedView.getTag();
-			if(lastTouchedView != touchedView){				
-				if((lastPosition >= mSelectStartPosition && lastPosition <= mSelectEndPosition) 
-						&& !(currentPosition >= mSelectStartPosition && currentPosition <= mSelectEndPosition)){
-					addSelectTime(currentPosition);
-					touchedView.setBackgroundColor(Color.GRAY);
-					showIndicators(gridView);
-				}else if((lastPosition >= mSelectStartPosition && lastPosition <= mSelectEndPosition) 
-						&& (currentPosition >= mSelectStartPosition && currentPosition <= mSelectEndPosition)){
-					removeSelectTime(lastPosition);
-					lastTouchedView.setBackgroundColor(Color.WHITE);
-					showIndicators(gridView);
-				}				
-				lastTouchedView = touchedView;
-			}
-		}
-	}
-	public void inactiveSelection(){
-		System.out.println("inactiveSelection");
-		mSelectActivedDay = "";
-		/*if(editingScheduleIndex >= 0){
-			HashMap<String, Integer> maxAndMinPosition = getMaxAndMinPosition();
-			try {
-				JSONObject startTimeObject = gridPositionToTime(maxAndMinPosition.get("min"));
-				JSONObject endTimeObject = gridPositionToTime(maxAndMinPosition.get("max"));
-				JSONObject thisSchedule = scheduleData.getJSONObject(editingScheduleIndex);
-				thisSchedule.put("weekday", startTimeObject.getInt("weekday"));
-				thisSchedule.put("start", startTimeObject.getString("start"));
-				thisSchedule.put("end", endTimeObject.getString("end"));
-			} catch (Exception e) {
-				
-			}			
-		}else{
-			HashMap<String, Integer> maxAndMinPosition = getMaxAndMinPosition();
-			try {
-				JSONObject startTimeObject = gridPositionToTime(maxAndMinPosition.get("min"));
-				JSONObject endTimeObject = gridPositionToTime(maxAndMinPosition.get("max"));
-				JSONObject thisSchedule = new JSONObject();
-				thisSchedule.put("weekday", startTimeObject.getInt("weekday"));
-				thisSchedule.put("start", startTimeObject.getString("start"));
-				thisSchedule.put("end", endTimeObject.getString("end"));
-				scheduleData.put(thisSchedule);
-			} catch (Exception e) {
-				
-			}	
-		}
-		editingScheduleIndex = -1;*/
-		selectionStart = false;
-		hideIndicators();
-		enableScroll(scrollView);
-	}
-	public void disableScroll (ScrollView scrollView){
-		scrollView.requestDisallowInterceptTouchEvent(true);
-		/*scrollView.setOnTouchListener( new OnTouchListener(){ 
+		mDeleteButton = (ImageView) findViewById(R.id.indicator_delete);
+		mDeleteButton.setOnClickListener(new View.OnClickListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				return true;
+			public void onClick(View v) {
+				deleteSelection();
 			}
-		});*/
+		});
 	}
-	public void enableScroll (ScrollView scrollView){
-		scrollView.requestDisallowInterceptTouchEvent(false);
-		//scrollView.setOnTouchListener(null);    
-	}/*
-	public HashMap<String, Integer> getMaxAndMinPosition(){
-		int maxPosition = (int)selectedArray.get(0);
-		int minPosition = (int)selectedArray.get(0);
-		for(int i=0; i < selectedArray.size(); i++){
-			int tempTag = (int) selectedArray.get(i);
-			if(tempTag < minPosition){
-				minPosition = tempTag;
-			}
-			if(tempTag > maxPosition){
-				maxPosition = tempTag;
-			}
+	public void drawCurrentSchedule(){
+		try {
+			for(int i=0; i < scheduleData.length(); i++){
+				JSONObject tempDayObject = new JSONObject();
+				tempDayObject = scheduleData.getJSONObject(i);
+				int thisDay = tempDayObject.getInt(DAY);
+				ExpandableHeightGridView thisGridView = (ExpandableHeightGridView) mWeekdayGridViews.get(thisDay-1);
+				JSONArray tempArray = new JSONArray();
+				tempArray = tempDayObject.getJSONArray(SCHEDULE_ARRAY);
+				for(int m=0; m < tempArray.length(); m++){
+					JSONObject temp = new JSONObject();
+					temp = (tempArray.getJSONObject(m));
+					String startTime = temp.getString(START_TIME);
+					String endTime = temp.getString(END_TIME);
+					Calendar thisCal = Calendar.getInstance();
+					thisCal.setTime(df.parse(endTime));
+					thisCal.add(Calendar.MINUTE, -30);
+					endTime = df.format(thisCal.getTime());
+					int startPosition = timeToGridPosition(startTime);
+					int endPosition = timeToGridPosition(endTime);
+					for(int position = startPosition; position <= endPosition; position++ ){
+						thisGridView.getChildAt(position).setBackgroundColor(getResources().getColor(R.color.schedule_blue));
+					}
+				}				
+			}	
+		} catch (Exception e) {
+			
 		}
-		HashMap<String, Integer> maxAndMinPosition = new HashMap<String, Integer>();
-		maxAndMinPosition.put("max", maxPosition);
-		maxAndMinPosition.put("min", minPosition);
-		return maxAndMinPosition;
-	}*/
+	}
+	
 	public int timeToGridPosition(String thisTime){
 		int gridPosition = 0;		
 		try {
@@ -374,58 +286,44 @@ public class MainActivity extends ActionBarActivity {
 		cal.add(Calendar.MINUTE, 30 * position);
 		String thisTime = df.format(cal.getTime());
 		return thisTime;
-	}
-	public void addSelectTime(int thisPosition){
-		if(thisPosition < mSelectStartPosition){
-			mSelectStartPosition = thisPosition;
-		}else if(thisPosition > mSelectEndPosition){
-			mSelectEndPosition = thisPosition;
+	}	
+	public void addGridToSchedule(int position){
+		if(position >= 0){
+			if(position < mSelectStartPosition){
+				mSelectStartPosition = position;
+			}else if(position > mSelectEndPosition){
+				mSelectEndPosition = position;
+			}
+			showIndicators((ExpandableHeightGridView)mSelectedGridView);
 		}
 	}
-	public void removeSelectTime(int thisPosition){
-		if(thisPosition == mSelectStartPosition){
-			mSelectStartPosition = thisPosition + 1;
-		}else if(thisPosition == mSelectEndPosition){
-			mSelectEndPosition = thisPosition - 1;
+	public void removeGridFromSchedule(int position){
+		if(position >= 0){
+			if(position == mSelectStartPosition){
+				mSelectStartPosition = position + 1;
+			}else if(position == mSelectEndPosition){
+				mSelectEndPosition = position - 1;
+			}
+			showIndicators((ExpandableHeightGridView)mSelectedGridView);
 		}
 	}
-	
-	/*
-	public JSONObject checkIfInExistedSchedule(JSONObject thisTimeObject){
-		try {
-			for(int i=0; i < scheduleData.length(); i++){
-				JSONObject schedule_temp = new JSONObject();
-				schedule_temp = scheduleData.getJSONObject(i);
-				int temp_weekday = schedule_temp.getInt("weekday");
-				String temp_start = schedule_temp.getString("start");
-				String temp_end = schedule_temp.getString("end");
-					
-				int thisWeekday = thisTimeObject.getInt("weekday");
-				if(thisWeekday == temp_weekday){
-					Date d_start = df.parse(temp_start);
-					Date d_end = df.parse(temp_end);
-					Date d_this = df.parse(thisTimeObject.getString("start"));
-					if(d_this.compareTo(d_start) >= 0
-							&& d_this.compareTo(d_end) < 0){
-						return schedule_temp;
-					}
-				}
-		    }
-	    } catch (Exception e) {
-				
-		} 
-		return new JSONObject();
-	}*/	
-	public void checkIfPressOnArros(){
-		
+	public void deleteSelection(){
+		disableInteractGrid();
 	}
-	public void drawSelectedSchedule(ExpandableHeightGridView gridView){		
-		int minPosition = mSelectStartPosition;
-		int maxPosition = mSelectEndPosition;
-		View startView = gridView.getChildAt(minPosition);
-		View endView = gridView.getChildAt(maxPosition);
-		startView.setBackgroundColor(getResources().getColor(R.color.schedule_grey));
-		endView.setBackgroundColor(getResources().getColor(R.color.schedule_grey));
+	public void drawSelectedSchedule(ExpandableHeightGridView gridView, View startView, View endView){
+		LinearLayout calendarLayout = (LinearLayout) findViewById(R.id.calendar_layout);
+		int marginTop = calendarLayout.getTop();
+		int selectionX = scheduleLeftMargin + (int)gridView.getX();
+		System.out.println("selectionX:" + selectionX);
+		int selectionY = (int)startView.getTop() + marginTop;
+		System.out.println("selectionY:"+ selectionY);
+		int selectionBottomY = (int)endView.getTop() + endView.getHeight() + marginTop;
+		int selectionWidth = startView.getWidth();
+		int selectionHeight = selectionBottomY - selectionY;
+		final RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(selectionWidth, selectionHeight);
+		lp.setMargins((int)selectionX, (int)selectionY, 0, 0);
+		mDrawSelectionLayout.setLayoutParams(lp);
+		mDrawSelectionLayout.setVisibility(View.VISIBLE);
 	}
 	public void showIndicators(ExpandableHeightGridView gridView){	
 		final ExpandableHeightGridView thisGridView = gridView;
@@ -433,8 +331,18 @@ public class MainActivity extends ActionBarActivity {
 		int maxPosition = mSelectEndPosition;
 		final View startView = gridView.getChildAt(minPosition);
 		final View endView = gridView.getChildAt(maxPosition);
+			
 		mStartIndicator.setText(gridPositionToTime(minPosition));
-		mEndIndicator.setText(gridPositionToTime(maxPosition));
+		String endTime = gridPositionToTime(maxPosition);
+		Calendar cal = Calendar.getInstance();
+		try {
+			cal.setTime(df.parse(endTime));
+			cal.add(Calendar.MINUTE, 30);
+		} catch (ParseException e) {
+			
+		}		
+		endTime = df.format(cal.getTime());
+		mEndIndicator.setText(endTime);
 		
 		mStartIndicator.setVisibility(View.VISIBLE);
 		mEndIndicator.setVisibility(View.VISIBLE);
@@ -445,11 +353,10 @@ public class MainActivity extends ActionBarActivity {
 				public void onGlobalLayout() {
 					LinearLayout calendarLayout = (LinearLayout) findViewById(R.id.calendar_layout);
 					int marginTop = calendarLayout.getTop();
-					int indicatorX = (int)thisGridView.getX() - mStartIndicator.getWidth() - INDICATOR_PADDING;
+					int indicatorX = scheduleLeftMargin + (int)thisGridView.getX() - mStartIndicator.getWidth() - indicatorPadding;
 					int indicatorY = (int)startView.getY() - mStartIndicator.getHeight()/2 + marginTop;
 					mStartIndicator.setX(indicatorX);
 					mStartIndicator.setY(indicatorY);
-					mStartIndicator.setZ(2);
 				}
 			}
 		);
@@ -459,7 +366,7 @@ public class MainActivity extends ActionBarActivity {
 				public void onGlobalLayout() {
 					LinearLayout calendarLayout = (LinearLayout) findViewById(R.id.calendar_layout);
 					int marginTop = calendarLayout.getTop();
-					int indicatorX = (int)thisGridView.getX() - mStartIndicator.getWidth() - INDICATOR_PADDING;
+					int indicatorX = scheduleLeftMargin + (int)thisGridView.getX() - mStartIndicator.getWidth() - indicatorPadding;
 					int indicatorY = (int)endView.getY() + endView.getHeight() - mEndIndicator.getHeight()/2 + marginTop;
 					mEndIndicator.setX(indicatorX);
 					mEndIndicator.setY(indicatorY);
@@ -476,8 +383,8 @@ public class MainActivity extends ActionBarActivity {
 				public void onGlobalLayout() {
 					LinearLayout calendarLayout = (LinearLayout) findViewById(R.id.calendar_layout);
 					int marginTop = calendarLayout.getTop();
-					int indicatorX = (int)thisGridView.getX() + thisGridView.getWidth()/2 - mUpIndicator.getWidth()/2;
-					int indicatorY = (int)startView.getY() - mUpIndicator.getHeight() - INDICATOR_PADDING + marginTop;
+					int indicatorX = scheduleLeftMargin + (int)thisGridView.getX() + thisGridView.getWidth()/2 - mUpIndicator.getWidth()/2;
+					int indicatorY = (int)startView.getY() - mUpIndicator.getHeight() - indicatorPadding + marginTop;
 					mUpIndicator.setX(indicatorX);
 					mUpIndicator.setY(indicatorY);
 				}
@@ -489,49 +396,155 @@ public class MainActivity extends ActionBarActivity {
 				public void onGlobalLayout() {
 					LinearLayout calendarLayout = (LinearLayout) findViewById(R.id.calendar_layout);
 					int marginTop = calendarLayout.getTop();
-					int indicatorX = (int)thisGridView.getX() + thisGridView.getWidth()/2 - mDownIndicator.getWidth()/2;
-					int indicatorY = (int)endView.getY() + endView.getHeight() + INDICATOR_PADDING + marginTop;
+					int indicatorX = scheduleLeftMargin + (int)thisGridView.getX() + thisGridView.getWidth()/2 - mDownIndicator.getWidth()/2;
+					int indicatorY = (int)endView.getY() + endView.getHeight() + indicatorPadding + marginTop;
 					mDownIndicator.setX(indicatorX);
 					mDownIndicator.setY(indicatorY);
 				}
 			}
 		);
 		
-		drawSelectedSchedule(gridView);
+		mDeleteButton.setVisibility(View.VISIBLE);	
+		//mDeleteButton.setLayoutParams(new RelativeLayout.LayoutParams(startView.getWidth(), RelativeLayout.LayoutParams.WRAP_CONTENT));
+		mDeleteButton.getViewTreeObserver().addOnGlobalLayoutListener(
+			new ViewTreeObserver.OnGlobalLayoutListener() {
+				@Override
+				public void onGlobalLayout() {
+					LinearLayout calendarLayout = (LinearLayout) findViewById(R.id.calendar_layout);
+					int marginTop = calendarLayout.getTop();
+					int buttonX = scheduleLeftMargin + (int)thisGridView.getX() + thisGridView.getWidth()/2 - mDeleteButton.getWidth()/2;
+					int endViewBottomY = (int)endView.getY() + endView.getHeight() + marginTop;
+					int startViewTopY = (int)startView.getY() + marginTop;
+					int selectionHeight = endViewBottomY - startViewTopY;
+					int buttonY = endViewBottomY - selectionHeight/2 - mDeleteButton.getHeight()/2 ;
+					mDeleteButton.setX(buttonX);
+					mDeleteButton.setY(buttonY);
+				}
+			}
+		);
+		
+		drawSelectedSchedule(thisGridView, startView, endView);
 	}
 	public void hideIndicators(){
 		mStartIndicator.setVisibility(View.INVISIBLE);
 		mEndIndicator.setVisibility(View.INVISIBLE);
 		mUpIndicator.setVisibility(View.INVISIBLE);
 		mDownIndicator.setVisibility(View.INVISIBLE);
+		mDeleteButton.setVisibility(View.INVISIBLE);
+		mDrawSelectionLayout.setVisibility(View.GONE);
 	}
 	public void enableInteractGrid(View touchedWeekdayGridView, int touchedPosition){
 		mSelectActivedDay = (String) touchedWeekdayGridView.getTag();
-		selectedGridView = touchedWeekdayGridView;
+		mSelectedGridView = touchedWeekdayGridView;
 		float thisViewX = touchedWeekdayGridView.getX();
-		float thisViewY = touchedWeekdayGridView.getY();
 		int thisWidth = touchedWeekdayGridView.getWidth();
 		int thisHeight = touchedWeekdayGridView.getHeight();
-		viewInteraction.setX(thisViewX);
-		viewInteraction.setY(thisViewY);
-		viewInteraction.setLayoutParams(new RelativeLayout.LayoutParams(thisWidth, thisHeight));
-		System.out.println("gridViewInteraction y: " + thisViewY);
+		viewInteraction.setX(scheduleLeftMargin + thisViewX);
+		viewInteraction.setY(0);
+		viewInteraction.setLayoutParams(new RelativeLayout.LayoutParams(thisWidth, thisHeight + scheduleTopMargin*2));
 		viewInteraction.setVisibility(View.VISIBLE);
-		viewInteraction.bringToFront();
 		
 		mSelectStartPosition = touchedPosition;
 		mSelectEndPosition = touchedPosition;
 		showIndicators((ExpandableHeightGridView)touchedWeekdayGridView);
-		//disableScroll(scrollView);
 	}
 	public void disableInteractGrid(){
-		WeekDayGridTouchEvent weekdayGridClickEvent = new WeekDayGridTouchEvent();
-		// disable interaction grid view
 		viewInteraction.setVisibility(View.GONE);
 		hideIndicators();
-		//enableScroll(scrollView);
 		mSelectActivedDay = "";
 	}
+	public void disableScroll (ScrollView scrollView){
+		scrollView.requestDisallowInterceptTouchEvent(true);
+	}
+	public void enableScroll (ScrollView scrollView){
+		scrollView.requestDisallowInterceptTouchEvent(false);
+	}
+	public class ScheduleTimeTouchEvent implements View.OnTouchListener{
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+        	float currentXPosition = event.getX();
+            float currentYPosition = event.getY();
+            currentYPosition = currentYPosition - scheduleTopMargin; 
+            int position = ((ExpandableHeightGridView)mSelectedGridView).pointToPosition((int) currentXPosition, (int) currentYPosition);
+        	
+        	switch (event.getAction()) {
+	            case MotionEvent.ACTION_DOWN:
+	            	mGridInteractionTouchState = TouchState.TOUCH_STATE_CLICK;
+	                // we don't know if it's a click or a scroll yet, but until we know
+	                // assume it's a click	 
+	                disableScroll(scrollView);
+	            	if(event.getY() < mSelectedGridView.getHeight() && position == mSelectStartPosition - 1){
+	            		mSelectionStartFrom = SelectionStartPoint.UP_ARROW;
+	            		lastTouchedY = currentYPosition;
+	            		lastTouchedPosition = position;
+	            	}else if(position == mSelectEndPosition + 1){
+	            		mSelectionStartFrom = SelectionStartPoint.DOWN_ARROW;
+	            		lastTouchedY = currentYPosition;
+	            		lastTouchedPosition = position;
+	            	}else if(event.getY() > mSelectedGridView.getHeight()  && lastTouchedPosition == WEEKDAY_GRID_COUNT -1){            	
+		            	// if down arrow on bottom, out of the index of weekday grid
+	            		mSelectionStartFrom = SelectionStartPoint.DOWN_ARROW;
+	            		lastTouchedY = currentYPosition;
+	            	}else{
+	            		mSelectionStartFrom = null;
+	            		lastTouchedY = -500;
+	            	}
+
+	                break;
+
+	            case MotionEvent.ACTION_MOVE:
+            		mGridInteractionTouchState = TouchState.TOUCH_STATE_MOVE;
+	            	if(mSelectionStartFrom == SelectionStartPoint.UP_ARROW){
+	            		if(position < mSelectEndPosition){
+		            		if(currentYPosition < lastTouchedY){	// move up
+		            			if(lastTouchedPosition != position){
+		            				addGridToSchedule(lastTouchedPosition);	    				
+		            			}
+		            		}else{
+		            			if(position == mSelectStartPosition){
+		            				System.out.println("removeGridFromSchedule:" + lastTouchedPosition);
+		            				removeGridFromSchedule(lastTouchedPosition);
+		            			}         
+	            			}     
+	            		}
+	        			lastTouchedPosition = position;	   
+	            	}else if(mSelectionStartFrom == SelectionStartPoint.DOWN_ARROW){
+            			if(position > mSelectStartPosition){
+		            		if(currentYPosition > lastTouchedY){	// move down
+		            			if(position > mSelectEndPosition){
+		            				if(position != lastTouchedPosition){
+			            				addGridToSchedule(lastTouchedPosition);
+			                			lastTouchedPosition = position;	   
+				            		}
+		            			}
+		            		}else{
+			            		if(position == mSelectEndPosition){
+			            			removeGridFromSchedule(position);
+			                		lastTouchedPosition = position;	   
+			            		}  
+		            		}
+		            	}else if(position == -1 && lastTouchedPosition == WEEKDAY_GRID_COUNT -1){
+            				addGridToSchedule(lastTouchedPosition);
+            			}            			
+	            	}
+            		lastTouchedY = currentYPosition;
+            		
+	                break;
+
+	            case MotionEvent.ACTION_UP:
+	            	mGridInteractionTouchState = TouchState.TOUCH_STATE_RESTING;
+	            	mSelectionStartFrom = null;
+	            	enableScroll(scrollView);
+	                break;
+
+	            default:
+	                //inactiveSelection();
+	                break;
+	        }
+            return true;
+        }
+    }   
+
 	public class WeekDayGridTouchEvent implements View.OnTouchListener{
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -555,8 +568,6 @@ public class MainActivity extends ActionBarActivity {
 
             case MotionEvent.ACTION_UP:
             	if(mWeekdayTouchState == TouchState.TOUCH_STATE_CLICK){
-            		System.out.println("touchedWeekdayGridView:" + thisView.getTag());
-            		System.out.println("position:" + position);
             		if(mSelectActivedDay.equals("")){
             			enableInteractGrid(thisView, position);
             		}else if(!mSelectActivedDay.equals((String) thisView.getTag())){
@@ -575,93 +586,6 @@ public class MainActivity extends ActionBarActivity {
         return true;
 		}		
 	}
-	public class ScheduleTimeTouchEvent implements View.OnTouchListener{
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-        	float currentXPosition = event.getX();
-            float currentYPosition = event.getY();
-         
-        	switch (event.getAction()) {
-	            case MotionEvent.ACTION_DOWN:
-	            	mGridInteractionTouchState = TouchState.TOUCH_STATE_CLICK;
-
-	                int position = ((ExpandableHeightGridView)selectedGridView).pointToPosition((int) currentXPosition, (int) currentYPosition);
-	            	// we don't know if it's a click or a scroll yet, but until we know
-	                // assume it's a click	 
-	            	/*if(!mSelectActivedDay.equals("")){
-            			initialMovement(touchedView);
-            		} */    
-	            	//System.out.println("interaction gird: " + thisView.getTag());
-	            	System.out.println("interaction gird position: " + position);
-	                break;
-
-	            case MotionEvent.ACTION_MOVE:
-	            	/*if(!mSelectActivedDay.equals("")){
-	            		mGridInteractionTouchState = TouchState.TOUCH_STATE_MOVE;
-		            	if(touchedView != null){
-		            		moveSelection(touchedView, thisView);
-		            	}
-	            	}*/
-	                break;
-
-	            case MotionEvent.ACTION_UP:
-	            	/*if(mGridInteractionTouchState == TouchState.TOUCH_STATE_CLICK){
-	            		if(mSelectActivedDay.equals("")){
-	            			activeSelection(touchedView, thisView);
-	            		}else if(!mSelectActivedDay.equals((String) thisView.getTag())){
-	            			mGridInteractionTouchState = TouchState.TOUCH_STATE_RESTING;
-	            			inactiveSelection();
-	            		}
-	            	}*/
-	                break;
-
-	            default:
-	                //inactiveSelection();
-	                break;
-	        }
-            return true;
-        }
-    }    
-	public class TimeAdapter extends BaseAdapter {
-	    private Context mContext;
-	    private ArrayList<String> mGridArray;
-	    
-	    public TimeAdapter(Context c, ArrayList<String> itemArray) {
-	        mContext = c;
-	        mGridArray = itemArray;
-	    }
-	    @Override
-	    public int getCount() {
-	        return mGridArray.size();
-	    }
-	    @Override
-	    public Object getItem(int position) {
-	        return null;
-	    }
-	    @Override
-	    public long getItemId(int position) {
-	        return 0;
-	    }
-
-	    public View getView(int position, View convertView, ViewGroup parent) {
-	        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	        View gridView;
-	        if (convertView == null) {
-	        	gridView = new View(mContext);
-	            gridView = inflater.inflate(R.layout.schedule_gridview_item, null);
-		        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, GRID_HEIGHT);
-		        gridView.setLayoutParams(params);
-	        } else {
-	            gridView = (View) convertView;
-	        }
-	        TextView textView = (TextView) gridView.findViewById(R.id.grid_item_label);
-	        textView.setText(mGridArray.get(position));	  
-	        gridView.setTag(position);
-	        
-	        return gridView;
-	    }
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
