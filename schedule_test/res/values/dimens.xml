@@ -3,5 +3,25 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-
+    
+    <dimen name="advanced_schedule_name_layout_height">64dp</dimen>
+    <dimen name="advanced_schedule_name_edit_text_size">18sp</dimen>
+    <dimen name="advanced_schedule_name_edit_padding_left">30dp</dimen>
+    <dimen name="advanced_schedule_name_edit_padding_right">30dp</dimen>
+    <dimen name="advanced_schedule_weekday_title_height">36dp</dimen>
+    <dimen name="advanced_schedule_time_title_total_width">59dp</dimen>
+    <dimen name="advanced_schedule_time_title_text_size">16sp</dimen>
+    <dimen name="advanced_schedule_time_title_width">43dp</dimen>    
+    <dimen name="advanced_schedule_time_title_margin_left">16dp</dimen>  
+    <dimen name="advanced_schedule_time_title_margin_top">9dp</dimen> 
+    <dimen name="advanced_schedule_weekday_margin_top">24dp</dimen>    
+    <dimen name="advanced_schedule_weekday_margin_bottom">24dp</dimen>   
+    <dimen name="advanced_schedule_weekday_padding_top">2dp</dimen> 
+    <dimen name="advanced_schedule_weekday_padding_bottom">2dp</dimen>
+    <dimen name="advanced_schedule_weekday_padding_left">1dp</dimen>
+    <dimen name="advanced_schedule_indicator_text_padding_left">5dp</dimen>
+    <dimen name="advanced_schedule_indicator_text_padding_right">5dp</dimen>
+    
+    <dimen name="advanced_schedule_grid_height">30dp</dimen>
+	<dimen name="advanced_schedule_indicator_padding">8dp</dimen>
 </resources>

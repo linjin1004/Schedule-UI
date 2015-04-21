@@ -8,7 +8,7 @@
     
    	<LinearLayout android:id="@+id/layout_schedule_name"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="@dimen/advanced_schedule_name_layout_height"
         android:orientation="vertical"
         android:layout_alignParentTop="true" >
         
@@ -16,89 +16,90 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text=""
-            android:textSize="18sp"
+            android:textSize="@dimen/advanced_schedule_name_edit_text_size"
             android:textColor="@color/schedule_name"
        		android:background="@drawable/schedule_name_input"
-       		android:paddingLeft="30dp"
-       		android:paddingRight="25dp" />
+       		android:paddingLeft="@dimen/advanced_schedule_name_edit_padding_left"
+       		android:paddingRight="@dimen/advanced_schedule_name_edit_padding_right" />
         
    	</LinearLayout>
 
     <TextView android:id="@+id/week_title_space"
-    	android:layout_width="75dp"
-        android:layout_height="36dp"
+    	android:layout_width="@dimen/advanced_schedule_time_title_total_width"
+        android:layout_height="@dimen/advanced_schedule_weekday_title_height"
         android:layout_below="@+id/layout_schedule_name"
         android:layout_alignParentLeft="true"
         android:background="@color/schedule_blue_green" />
     <!-- weekdays on top -->
     <LinearLayout android:id="@+id/layout_weekdays"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/advanced_schedule_weekday_title_height"
         android:orientation="horizontal"
         android:layout_below="@+id/layout_schedule_name"
-        android:layout_toEndOf="@+id/week_title_space" >
+        android:layout_toEndOf="@+id/week_title_space"
+        android:layout_alignParentRight="true" >
         
         <TextView
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="bottom"
+            android:gravity="center|bottom"
             android:text="@string/sun"
-            android:textSize="16sp"
+            android:textSize="@dimen/advanced_schedule_time_title_text_size"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="bottom"
+            android:gravity="center|bottom"
             android:text="@string/mon"
-            android:textSize="16sp"
+            android:textSize="@dimen/advanced_schedule_time_title_text_size"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="bottom"
+            android:gravity="center|bottom"
             android:text="@string/tue"
-            android:textSize="16sp"
+            android:textSize="@dimen/advanced_schedule_time_title_text_size"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="bottom"
+            android:gravity="center|bottom"
             android:text="@string/wed"
-            android:textSize="16sp"
+            android:textSize="@dimen/advanced_schedule_time_title_text_size"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="bottom"
+            android:gravity="center|bottom"
             android:text="@string/thr"
-            android:textSize="16sp"
+            android:textSize="@dimen/advanced_schedule_time_title_text_size"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="bottom"
+            android:gravity="center|bottom"
             android:text="@string/fri"
-            android:textSize="16sp"
+            android:textSize="@dimen/advanced_schedule_time_title_text_size"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
         <TextView
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="bottom"
+            android:gravity="center|bottom"
             android:text="@string/sat"
-            android:textSize="16sp"
+            android:textSize="@dimen/advanced_schedule_time_title_text_size"
             android:textColor="@android:color/white"
             android:background="@color/schedule_blue_green" />
     </LinearLayout>
@@ -116,12 +117,12 @@
         	
             <com.example.schedule_test.ExpandableHeightGridView 
 			    android:id="@+id/gridview_time"
-				android:layout_width="43dp"
+				android:layout_width="@dimen/advanced_schedule_time_title_width"
 				android:layout_height="match_parent"						
 		        android:layout_alignParentTop="true"	    
 		        android:layout_alignParentLeft="true"
-		        android:layout_marginLeft="16dp"
-		        android:layout_marginTop="9dp"
+		        android:layout_marginLeft="@dimen/advanced_schedule_time_title_margin_left"
+		        android:layout_marginTop="@dimen/advanced_schedule_time_title_margin_top"
 				android:numColumns="1"
 				android:gravity="center">							
 			</com.example.schedule_test.ExpandableHeightGridView >
@@ -131,8 +132,8 @@
 		        android:layout_height="wrap_content"
 		        android:orientation="horizontal"
 		        android:layout_toEndOf="@+id/gridview_time"
-		        android:layout_marginTop="24dp"
-		        android:layout_marginBottom="24dp" >
+		        android:layout_marginTop="@dimen/advanced_schedule_weekday_margin_top"
+		        android:layout_marginBottom="@dimen/advanced_schedule_weekday_margin_bottom" >
 				
 			    <com.example.schedule_test.ExpandableHeightGridView 
 			        android:id="@+id/gridview_sun"
@@ -142,9 +143,9 @@
 					android:numColumns="1"
 					android:gravity="center"
 					android:listSelector="@android:color/transparent"
-					android:paddingTop="2dp"
-					android:paddingBottom="2dp"					
-					android:paddingLeft="1dp"
+					android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+					android:paddingBottom="@dimen/advanced_schedule_weekday_padding_bottom"					
+					android:paddingLeft="@dimen/advanced_schedule_weekday_padding_left"
             		android:background="@color/schedule_blue_green" >							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
@@ -156,9 +157,9 @@
 					android:numColumns="1"
 					android:gravity="center"
 					android:listSelector="@android:color/transparent"
-					android:paddingTop="2dp"
-					android:paddingBottom="2dp"					
-					android:paddingLeft="1dp"
+					android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+					android:paddingBottom="@dimen/advanced_schedule_weekday_padding_bottom"					
+					android:paddingLeft="@dimen/advanced_schedule_weekday_padding_left"
             		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >		
 				
@@ -170,9 +171,9 @@
 					android:numColumns="1"
 					android:gravity="center"
 					android:listSelector="@android:color/transparent"
-					android:paddingTop="2dp"
-					android:paddingBottom="2dp"					
-					android:paddingLeft="1dp"
+					android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+					android:paddingBottom="@dimen/advanced_schedule_weekday_padding_bottom"					
+					android:paddingLeft="@dimen/advanced_schedule_weekday_padding_left"
             		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
@@ -184,9 +185,9 @@
 					android:numColumns="1"
 					android:gravity="center"
 					android:listSelector="@android:color/transparent"
-					android:paddingTop="2dp"
-					android:paddingBottom="2dp"					
-					android:paddingLeft="1dp"
+					android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+					android:paddingBottom="@dimen/advanced_schedule_weekday_padding_bottom"					
+					android:paddingLeft="@dimen/advanced_schedule_weekday_padding_left"
             		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
@@ -198,9 +199,9 @@
 					android:numColumns="1"
 					android:gravity="center"
 					android:listSelector="@android:color/transparent"
-					android:paddingTop="2dp"
-					android:paddingBottom="2dp"					
-					android:paddingLeft="1dp"
+					android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+					android:paddingBottom="@dimen/advanced_schedule_weekday_padding_bottom"					
+					android:paddingLeft="@dimen/advanced_schedule_weekday_padding_left"
             		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
@@ -212,9 +213,9 @@
 					android:numColumns="1"
 					android:gravity="center"
 					android:listSelector="@android:color/transparent"
-					android:paddingTop="2dp"
-					android:paddingBottom="2dp"					
-					android:paddingLeft="1dp"
+					android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+					android:paddingBottom="@dimen/advanced_schedule_weekday_padding_bottom"					
+					android:paddingLeft="@dimen/advanced_schedule_weekday_padding_left"
             		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >	
 				
@@ -226,9 +227,9 @@
 					android:numColumns="1"
 					android:gravity="center"
 					android:listSelector="@android:color/transparent"
-					android:paddingTop="2dp"
-					android:paddingBottom="2dp"					
-					android:paddingLeft="1dp"
+					android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+					android:paddingBottom="@dimen/advanced_schedule_weekday_padding_bottom"					
+					android:paddingLeft="@dimen/advanced_schedule_weekday_padding_left"
             		android:background="@color/schedule_blue_green">							
 				</com.example.schedule_test.ExpandableHeightGridView >		
 			    
@@ -239,10 +240,10 @@
 		        android:layout_height="wrap_content"
 		        android:orientation="horizontal"
 	            android:background="@color/schdeul_indicator"
-				android:paddingTop="2dp"
-				android:paddingBottom="2dp"					
-				android:paddingLeft="2dp"					
-				android:paddingRight="2dp"
+				android:paddingTop="@dimen/advanced_schedule_weekday_padding_top"
+				android:paddingBottom="@dimen/advanced_schedule_weekday_padding_top"					
+				android:paddingLeft="@dimen/advanced_schedule_weekday_padding_top"
+				android:paddingRight="@dimen/advanced_schedule_weekday_padding_top"
 				android:visibility="gone">
 	            <View 
 					android:layout_width="match_parent"
@@ -255,8 +256,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/schedule_ime_bg"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
+                android:paddingLeft="@dimen/advanced_schedule_indicator_text_padding_left"
+                android:paddingRight="@dimen/advanced_schedule_indicator_text_padding_right"
                 android:text="00:00"
                 android:textColor="@android:color/white"
                 android:visibility="gone" />
@@ -265,8 +266,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/schedule_ime_bg"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
+                android:paddingLeft="@dimen/advanced_schedule_indicator_text_padding_left"
+                android:paddingRight="@dimen/advanced_schedule_indicator_text_padding_right"
                 android:text="00:00"
                 android:textColor="@android:color/white"
                 android:visibility="gone"  />
@@ -294,7 +295,8 @@
             <ImageView android:id="@+id/indicator_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/schedule_delete"
+                android:src="@drawable/schedule_delete"
+                android:scaleType="center"
                 android:visibility="gone" />
             
 		</RelativeLayout>

@@ -1551,6 +1551,25 @@ containing a value of this type.
          */
         public static final int activity_horizontal_margin=0x7f07002b;
         public static final int activity_vertical_margin=0x7f07002c;
+        public static final int advanced_schedule_grid_height=0x7f07003e;
+        public static final int advanced_schedule_indicator_padding=0x7f07003f;
+        public static final int advanced_schedule_indicator_text_padding_left=0x7f07003c;
+        public static final int advanced_schedule_indicator_text_padding_right=0x7f07003d;
+        public static final int advanced_schedule_name_edit_padding_left=0x7f07002f;
+        public static final int advanced_schedule_name_edit_padding_right=0x7f070030;
+        public static final int advanced_schedule_name_edit_text_size=0x7f07002e;
+        public static final int advanced_schedule_name_layout_height=0x7f07002d;
+        public static final int advanced_schedule_time_title_margin_left=0x7f070035;
+        public static final int advanced_schedule_time_title_margin_top=0x7f070036;
+        public static final int advanced_schedule_time_title_text_size=0x7f070033;
+        public static final int advanced_schedule_time_title_total_width=0x7f070032;
+        public static final int advanced_schedule_time_title_width=0x7f070034;
+        public static final int advanced_schedule_weekday_margin_bottom=0x7f070038;
+        public static final int advanced_schedule_weekday_margin_top=0x7f070037;
+        public static final int advanced_schedule_weekday_padding_bottom=0x7f07003a;
+        public static final int advanced_schedule_weekday_padding_left=0x7f07003b;
+        public static final int advanced_schedule_weekday_padding_top=0x7f070039;
+        public static final int advanced_schedule_weekday_title_height=0x7f070031;
         /**  The platform's desired fixed height for a dialog along the major axis
          (the screen is in portrait). This may be either a fraction or a dimension.
  The platform's desired fixed height for a dialog along the major axis
